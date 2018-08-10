@@ -50,17 +50,19 @@ namespace Microsoft.Bot.Sample.QnABot
 
         private static Attachment GetSelectedCard(string answer){
 
-        int len = answer.Split(';').Length;
+            int len = answer.Split(';').Length;
             
-            switch (len){
+            /*switch (len){
             
             case 4: return GetHeroCard(answer);
             //case 6: return GetVideoCard(answer); 
             default: return GetHeroCard(answer);
             
-            }
+            }*/
+            return GetHeroCard(answer);
 
         }
+
 
         private static Attachment GetHeroCard(string answer){
             string[] qnaAnswerData = answer.Split(';');
@@ -85,31 +87,12 @@ namespace Microsoft.Bot.Sample.QnABot
             retrun card.ToAttachement();
         }
 
+        // GET VIDEO HERE
 
-/* From 10min
-         private static Attachment GetVideoCard(string answer){
-            string[] qnaAnswerData = answer.Split(';');
-            string title = qnaAnswerData[0];
-             string subtitle= qnaAnswerData[1];
-            string url = qnaAnswerData[2];
-            string imageURL= qnaAnswerData[3];
 
-            HeroCard card = new HeroCard{
-            Title = title,
-            Subtitle = description,
-            };
 
-            card.Buttons = new List<CardAction>{
-                new CardAction(ActionTypes.OpenUrl,"Learn More", value: url)
-            };
 
-            card.Images = new List<CardImage>{
-            new CardImage (url = imageURL)
-            };
 
-            retrun card.ToAttachement();
-        }
-*/
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
@@ -179,3 +162,31 @@ namespace Microsoft.Bot.Sample.QnABot
 
     }
 }
+
+
+
+
+/* From 10min
+         private static Attachment GetVideoCard(string answer){
+            string[] qnaAnswerData = answer.Split(';');
+            string title = qnaAnswerData[0];
+             string subtitle= qnaAnswerData[1];
+            string url = qnaAnswerData[2];
+            string imageURL= qnaAnswerData[3];
+
+            HeroCard card = new HeroCard{
+            Title = title,
+            Subtitle = description,
+            };
+
+            card.Buttons = new List<CardAction>{
+                new CardAction(ActionTypes.OpenUrl,"Learn More", value: url)
+            };
+
+            card.Images = new List<CardImage>{
+            new CardImage (url = imageURL)
+            };
+
+            retrun card.ToAttachement();
+        }
+*/
