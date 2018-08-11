@@ -1,16 +1,19 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Collections.Generic;
 
 using Microsoft.Bot.Builder.Azure;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.CognitiveServices.QnAMaker;
 using Microsoft.Bot.Connector;
 
+
 namespace Microsoft.Bot.Sample.QnABot
 {
     [Serializable]
-    public class RootDialog : QnAMakerDialog
+    public class RootDialog : IDialog<Object> //RootDialog : QnAMakerDialog
     {
         public async Task StartAsync(IDialogContext context)
         {
@@ -18,15 +21,15 @@ namespace Microsoft.Bot.Sample.QnABot
             *  to process that message. */
             context.Wait(this.MessageReceivedAsync);
         }
-
-
-        public RootDialog() : base(new QnAMakerService(new QnAMakerAttribute(RootDialog.GetSetting("QnAAuthKey"),Utils.GetAppSetting("QnAKnowledgebaseId"),"this - No good match in FAQ.", 0.5)))
+/*
+        public RootDialog() : base(new QnAMakerService(new QnAMakerAttribute(RootDialog.GetSetting("QnAAuthKey"), Utils.GetAppSetting("QnAKnowledgebaseId"), "this - No good match in FAQ.", 0.5)))
         {
 
         }
-        
+
         protected override async Task RespondFromQnAMakerResultAsync(IDialogContext context, IMessageActivity message, QnAMakerResults result)
-        { 
+        {
+
             var answer = result.Answers.First().Answer;
             Activity reply = ((Activity)context.Activity).CreateReply();
 
@@ -34,46 +37,61 @@ namespace Microsoft.Bot.Sample.QnABot
             int dataSize = qnaAnswerData.Length;
 
             // image or video
-            if (dataSize>1 && dataSize<=6){
+            if (dataSize > 1 && dataSize <= 6)
+            {
 
-            var attachment = GetSelectedCard(answer);
-            reply.Attachments.Add(attachment);
-            await context.PostAsync(reply);
-
-            } else {
-
-            await context.Forward(new BasicQnAMakerDialog(), AfterAnswerAsync, message, CancellationToken.None);
-            await context.PostAsync(reply);
+                var attachment = GetSelectedCard(answer);
+                reply.Attachments.Add(attachment);
+                await context.PostAsync(reply);
 
             }
+            else
+            {
+
+                await context.Forward(new BasicQnAMakerDialog(), AfterAnswerAsync, message, CancellationToken.None);
+                await context.PostAsync(reply);
+
+            }
+
         }
 
-        private static Attachment GetSelectedCard(string answer){
+
+        private static Attachment GetSelectedCard(string answer)
+        {
 
             int len = answer.Split(';').Length;
-            
-            /*switch (len){
-            
-            case 4: return GetHeroCard(answer);
-            //case 6: return GetVideoCard(answer); 
-            default: return GetHeroCard(answer);
-            
-            }*/
-            return GetHeroCard(answer);
 
+
+            switch (len)
+            {
+
+                case 4: return GetHeroCard(answer);
+                //case 6: return GetVideoCard(answer); 
+                default: return GetHeroCard(answer);
+
+            }
+            return GetHeroCard(answer);
         }
 
+        /// <summary>
+        /// Hero Card or Image Card
+        /// </summary>
+        /// <param name = "answer"></param>
+        /// <returns></returns>
 
-        private static Attachment GetHeroCard(string answer){
+        private static Attachment GetHeroCard(string answer)
+        {
+
             string[] qnaAnswerData = answer.Split(';');
             string title = qnaAnswerData[0];
-            string description= qnaAnswerData[1];
+            string description = qnaAnswerData[1];
             string url = qnaAnswerData[2];
-            string imageURL= qnaAnswerData[3];
+            string imageURL = qnaAnswerData[3];
 
-            HeroCard card = new HeroCard{
-            Title = title,
-            Subtitle = description,
+            HeroCard card = new HeroCard
+            {
+                Title = title,
+                Subtitle = description,
             };
 
             card.Buttons = new List<CardAction>{
@@ -81,26 +99,22 @@ namespace Microsoft.Bot.Sample.QnABot
             };
 
             card.Images = new List<CardImage>{
-            new CardImage (url = imageURL)
+            new CardImage(url = imageURL)
             };
 
-            retrun card.ToAttachement();
+            return card.ToAttachment();
+
         }
 
-        // GET VIDEO HERE
+*/
 
-
-
-
-
-
-        private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
+        private new async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
             /* When MessageReceivedAsync is called, it's passed an IAwaitable<IMessageActivity>. To get the message,
              *  await the result. */
             var message = await result;
 
-            var qnaAuthKey = GetSetting("QnAAuthKey"); 
+            var qnaAuthKey = GetSetting("QnAAuthKey");
             var qnaKBId = Utils.GetAppSetting("QnAKnowledgebaseId");
             var endpointHostName = Utils.GetAppSetting("QnAEndpointHostName");
 
@@ -119,6 +133,7 @@ namespace Microsoft.Bot.Sample.QnABot
             }
 
         }
+
 
         private async Task AfterAnswerAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
@@ -145,7 +160,7 @@ namespace Microsoft.Bot.Sample.QnABot
         // Parameters to QnAMakerService are:
         // Required: subscriptionKey, knowledgebaseId, 
         // Optional: defaultMessage, scoreThreshold[Range 0.0 – 1.0]
-        public BasicQnAMakerPreviewDialog() : base(new QnAMakerService(new QnAMakerAttribute(RootDialog.GetSetting("QnAAuthKey"), Utils.GetAppSetting("QnAKnowledgebaseId"), "No good match in FAQ.", 0.5)))
+        public BasicQnAMakerPreviewDialog() : base(new QnAMakerService(new QnAMakerAttribute(RootDialog.GetSetting("QnAAuthKey"), Utils.GetAppSetting("QnAKnowledgebaseId"), "this2 - No good match in FAQ.", 0.5)))
         { }
     }
 
@@ -157,7 +172,7 @@ namespace Microsoft.Bot.Sample.QnABot
         // Parameters to QnAMakerService are:
         // Required: qnaAuthKey, knowledgebaseId, endpointHostName
         // Optional: defaultMessage, scoreThreshold[Range 0.0 – 1.0]
-        public BasicQnAMakerDialog() : base(new QnAMakerService(new QnAMakerAttribute(RootDialog.GetSetting("QnAAuthKey"), Utils.GetAppSetting("QnAKnowledgebaseId"), "No good match in FAQ.", 0.5, 1, Utils.GetAppSetting("QnAEndpointHostName"))))
+        public BasicQnAMakerDialog() : base(new QnAMakerService(new QnAMakerAttribute(RootDialog.GetSetting("QnAAuthKey"), Utils.GetAppSetting("QnAKnowledgebaseId"), "this3-No good match in FAQ.", 0.5, 1, Utils.GetAppSetting("QnAEndpointHostName"))))
         { }
 
     }
